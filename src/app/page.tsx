@@ -1,3 +1,4 @@
+import { GlobeSection } from "@/components/globe/GlobeSection";
 import { CaseStudyIndex } from "@/components/home/CaseStudyIndex";
 import { CurrentlyContact } from "@/components/home/CurrentlyContact";
 import { Hero } from "@/components/home/Hero";
@@ -16,6 +17,7 @@ export default function Home() {
     <main>
       <SiteNav />
       <Hero />
+      <GlobeSection />
       <CaseStudyIndex
         watchlists={watchlists.meta}
         patent={patent.meta}
