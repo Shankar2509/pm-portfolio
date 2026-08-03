@@ -1,82 +1,140 @@
 ---
-title: "We surveyed 500 people, and the data told us we were building the wrong thing"
+title: "Five strangers, ten months, one patent"
 slug: "vehicle-safety-patent"
 order: 5
-role: "Lead inventor · led a team of 5 engineers across 3 disciplines"
+role: "Team lead · lead inventor"
 timeframe: "Aug 2022 – May 2024"
 company: "Alliance University"
 featured: true
-summary: "Research, a pivot, a cross-disciplinary team, and a published patent. The whole product loop, before I knew it had a name."
-tags: ["User research", "Product pivot", "Team leadership", "Patent"]
+summary: "A student filling in our survey stopped to tell me about his friend — a highway, a rainy night, unconscious and unnoticed for hours. That's the reason the device sends the alert by itself."
+tags: ["User research", "Team leadership", "Scope decisions", "Patent"]
 ---
 
-<!--
-  Your best pure-product narrative — it contains every phase of the PM loop.
-  Lead with the pivot. "I changed my mind because of data" is the single most
-  valuable sentence a junior PM candidate can say.
--->
+## The setup
 
-## The problem
+My college runs a Design Thinking Module across semesters five, six and seven. The
+department assigns you a team of students from different branches and three mentor
+professors, also from different departments, and gives you about ten months to define,
+design and build something.
 
-The gap between a road accident happening and help arriving. In India it's often called the
-Platinum Hour — survival depends heavily on what happens in the first sixty minutes.
+Our team was five people across three disciplines — two from EEE, two from CSE, and me from
+ECE. None of us had met before.
 
-<!-- WRITE THIS: Why did you pick this problem? Was there a personal reason?
-     A personal motivation, honestly stated, is memorable. -->
+The structure is strict. **DTM-1** is problem definition only: survey, research, and proof
+that the problem is worth solving, approved first by our mentors and then by external
+examiners. **DTM-2** is the plan — a step-by-step implementation guide, presented weekly.
+**DTM-3** is the build, and it ends in a showcase to a judging panel.
 
-## Research
+Nobody volunteered to lead, so I did.
 
-We surveyed **500+ participants** to test whether the problem we imagined was the problem
-people actually had.
+## The first problem was us
 
-<!-- WRITE THIS: What did you ask? How did you reach 500 people as a student?
-     What did you expect to hear? -->
+Before we could pick a project, everyone wanted to build the thing their own department was
+good at. The CSE guys wanted a web project they could code. The EEE guys wanted to build a
+new kind of transformer. Everyone had a favourite and no one was listening.
 
-## The pivot
+So I asked each person to come back with three points about their own idea:
 
-We had assumed the product was about faster manual reporting — making it easier for someone
-at the scene to raise an alert.
+1. Is it worth solving?
+2. How does the team contribute to it — all of us, not just you?
+3. Why should the others' ideas *not* be picked?
 
-The data said otherwise. Manual reporting was the dominant point of failure: in a real
-crash, often nobody is in a state to report anything.
+The third question is the one that changed the room. Once you have to say out loud why
+someone else's idea is weaker, you have to actually engage with it, and you stop defending
+your own out of habit.
 
-So we changed direction. The product became fully automated alerting — sensors detect the
-crash, GPS and GSM send the alert, no human required.
+After that discussion we stopped thinking as four departments and started thinking as a
+team. The roles fell out on their own: CSE on the software, me and the EEE guys on the
+hardware prototype, and all of us on the part where the code has to talk to the hardware.
 
-<!-- WRITE THIS: What was it like to throw away the original concept?
-     Did the team agree? How did you make the call? -->
+## Finding the problem
 
-## Building it
+We went through a lot of ideas and rejected most of them in brainstorming. What we kept
+coming back to was road accidents — the numbers are enormous and nothing about it is a
+solved problem.
 
-Led five engineers across computer science, electrical and electronics disciplines.
-Ran weekly syncs, tracked dependencies, and resolved the conflicts that came up between the
-hardware and software sub-teams.
+But "accidents are bad" isn't a project. DTM-1 exists to force you to prove there is a
+specific problem worth building for, so we ran a survey. A Google Form circulated online,
+and offline we walked around campus asking people to scan the QR and fill it in.
 
-<!-- WRITE THIS: The hardest coordination problem. Hardware and software teams disagree
-     about different things and move at different speeds — what did that look like? -->
+<Metric value="500+" caveat="survey responses, collected online and in person on campus" />
 
-<!-- Also worth including: the drowsiness detection feature (blink sensor +
-     engine-locking) that moved the product from reactive to preventive.
-     Why did you add it? -->
+Two things came out of it.
 
-## Getting it funded
+**One question mattered more than the rest.** We asked whether the respondent, or someone
+they knew, had been involved in an accident. Most people said yes. That single answer took
+the project from a statistic we'd read somewhere to something that had touched most of the
+people around us, and it made every decision after it easier to justify.
 
-Pitched the prototype and business case to the university Intellectual Property Cell and an
-academic panel. They funded the patent filing.
+**And one person stopped filling in the form to talk to me.** He told me about a friend who
+crashed on a highway on a rainy night. Nobody saw it happen. He was unconscious and lay
+there for a long time before a passing truck driver noticed him and got him to a hospital,
+by which point he had lost a lot of blood.
 
-<!-- WRITE THIS: What was in the pitch? What convinced them?
-     What did you learn about persuading people who control a budget? -->
+That story is the reason the device doesn't wait for anyone to press anything.
 
-## Outcome
+## What the research told us to build
+
+The survey and market research pointed at three causes behind accident deaths:
+
+1. **Delay in alerting emergency services**
+2. **Alcohol consumption**
+3. **Late-night drowsiness**
+
+All three were identified in DTM-1, before we built anything. We then designed one device
+that addressed all three:
+
+- **On crash detection**, it immediately sends a message with the accident location to
+  pre-set family and friend numbers. It doesn't need the victim to be conscious.
+- **If alcohol is detected** on the driver, it locks the engine.
+- **If drowsiness is detected**, it wakes the driver with a loud alert.
+
+## Two arguments I had to win
+
+**The mentors didn't agree with each other.** Some thought the problem was worth solving and
+believed we could do it. At least one wasn't convinced it was needed, or that students could
+build something that complex. She asked us to come back within a week with a demo. We
+presented the concrete steps of how we'd get there, and she approved it.
+
+**The CSE team wanted facial recognition for drowsiness detection.** It was the better
+solution and I agreed with them in principle. But training a model, integrating it with the
+rest of the system, and doing it inside a fixed academic deadline — with the cost that came
+with it — wasn't realistic.
+
+We talked it through and went with eye-blink sensors instead. Less ambitious, and it worked.
+
+## How the patent happened
+
+There was no separate pitch, which surprised me.
+
+After the DTM-3 showcase, the judging panel decides which projects are worth filing a patent
+on and recommends them to the college IPR Cell. The IPR Cell then asks for a written
+document explaining the innovation. We wrote it and sent it in.
+
+They accepted it as novel because of **three problem solutions embedded in a single
+device** — not any one of the three on its own.
+
+Most of the other teams didn't get through, and I think I know why. The safe move is to take
+an existing project, change a few things, finish it and collect the marks. We and our mentors
+were aiming at something new from the beginning. Novelty is the whole test for a patent, so
+the teams that optimised for marks were never going to clear it.
 
 **Indian Patent Application No. 202441049990 — Published.**
-Conference paper at ICADIE-2024.
+Also published as a conference paper at ICADIE-2024.
 
 ## What I'd do differently
 
-<!-- WRITE THIS -->
+**The ML model.** I still think facial-recognition drowsiness detection would have made the
+invention meaningfully stronger. I made the right call at the time — I couldn't risk the
+deadline and our marks on it — but it's the one thing I'd go back for if the constraint
+weren't there.
 
-## Artifacts
+**Documentation, and this one actually changed how I work.** We put everything into demos,
+slide decks and the prototype. We wrote almost nothing down as we went. Then at the end of
+DTM-3 we had to submit a full detailed report covering all three modules from start to
+finish, and we had to reconstruct ten months of work in one sitting. It was miserable, and
+it was entirely our own doing.
 
-<!-- Survey data visualisation, the patent filing, the system diagram, prototype photos.
-     The survey chart is the most valuable one — it's the evidence behind the pivot. -->
+I document as I go now. Two years later, as an SDE, I still do it — I write things down
+while they're fresh so future-me doesn't have to rebuild them from memory. That's the
+lesson from this project I actually use.

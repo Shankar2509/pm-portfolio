@@ -1,79 +1,119 @@
 ---
-title: "Turning a catalogue into a social surface"
+title: "The catalogue was good. Nobody could find the good part."
 slug: "watchlists"
 order: 1
-role: "iOS Developer — drove ideation and development"
+role: "iOS Developer — proposed the feature and built it"
 timeframe: "2025"
 company: "Contus Tech · VPlayed OTT platform"
 featured: true
-summary: "Users watched and left. So we let them make lists, share them, and argue about them."
+summary: "An indie film library nobody could navigate. I had admin filters to find the good stuff. Users didn't. So I gave them each other instead."
 tags: ["Product discovery", "Social features", "Retention"]
 ---
 
-<!--
-  ⚠️ WRITE THE PROSE YOURSELF. The facts and structure below are pulled from your profile.
-  Sections marked WRITE THIS are yours. Delete these comments as you go.
+## The library was the problem, not the product
 
-  Target: a reviewer should get the whole story in 90 seconds of skimming,
-  and a richer version if they read properly.
--->
+I work on the iOS and tvOS apps for VPlayed, an OTT streaming platform. One of the
+catalogues I worked on is mostly indie films — small filmmakers, no marketing budget, not
+titles anyone arrives already looking for.
 
-## Context
+It's a genuinely good library. That was the frustrating part. As an admin I could filter by
+genre, sort by what was being watched, and find things worth watching in a few minutes.
 
-Contus Tech builds VPlayed, an OTT streaming platform white-labelled for clients across six
-countries. I work on the iOS and tvOS apps.
+Users couldn't do any of that. They got a home screen and a search bar.
 
-<!-- WRITE THIS: 2–3 sentences. What was the product, who used it, what was your remit?
-     Plain language — how you'd explain it to a friend who doesn't work in tech. -->
+I had a discovery tool the audience didn't have. Once I noticed that, the problem stopped
+being "how do we get people to watch more" and became "how do people find the good films
+when there's nothing telling them which ones those are."
 
-## The problem
+## What the data was already showing
 
-Content discovery was passive. A catalogue, a few algorithmic rows, and no reason for a
-user to come back on a day when nothing new had dropped.
+Two things pointed the same way.
 
-<!-- WRITE THIS: How did you notice? What did the data show, or what did you observe?
-     Be concrete about how the problem surfaced — that's the part reviewers care about. -->
+In the admin analytics, each title has its own numbers. Titles with higher share counts
+also had higher watch counts. Sharing and watching moved together.
 
-## The insight
+And people were already sharing — the app had ratings and comments on each title, and some
+users were copying links and sending individual films to friends. One title at a time.
 
-Discovery is social. A recommendation from a person outperforms a row of thumbnails — and
-users will produce those recommendations for free if you give them somewhere to put them.
+That last detail is what started it. Sharing one film at a time is slow. My first thought
+wasn't a social feature at all. It was just: let people share more than one film at once.
 
-<!-- WRITE THIS: Where did this come from? Something you saw elsewhere? An observation
-     about how people actually talk about shows? Say it in your own words. -->
+## Why not build recommendations
 
-## What I built
+The obvious answer to "users can't find the good content" is a recommendation engine.
+Learn what someone likes, suggest more of it.
 
-Public watchlists. Users curate lists of titles, share them, and other users can like and
-comment on them.
+I argued against it, for two reasons.
 
-<!-- WRITE THIS: The specific decisions. Why public rather than private-by-default?
-     Why likes AND comments? What did you deliberately leave out of v1, and why?
-     Trade-offs are the most interesting part of any case study. -->
+The first is about the content. These are indie films. If the app tells you something is
+"most watched", that doesn't mean much — you've never heard of it, and you know the app
+wants you to click. If a friend tells you a film is good, you'll probably watch it. For
+long-tail content, word of mouth carries far more weight than anything the platform says
+about itself.
+
+A film like Avengers doesn't need this. It's already known, already promoted everywhere.
+Small films are exactly where a recommendation from a person beats a recommendation from an
+algorithm.
+
+The second reason was cost. A personalised recommendation engine is a large amount of work
+before it returns anything useful. Sharing was much less effort and, for this catalogue, I
+thought it would deliver more.
 
 <Metric value="12%" caveat="release-level result across three features — see below" />
 
-## Outcome, honestly
+## What shipped
 
-The watchlist shipped in a release alongside EPG improvements and HLS streaming
-optimizations. Retention across that release rose 12%.
+It started as bulk sharing and turned into something bigger.
+
+**Watchlists.** Create a list, keep adding titles to it over time.
+
+**Two ways to share, deliberately different.** Share to a *collaborator* and the other
+person can add and remove titles — you build the list together. Share *publicly* and anyone
+can view it, like it, comment on it, and share it on again.
+
+**Follow other users.** If someone's taste matches yours, you can follow them and keep up
+with the lists they make.
+
+**A profile page**, close to Instagram's — how many watchlists you've made, followers,
+following.
+
+**A "New Watchlists" tab** on the home screen, where admins feature lists made by users so
+everyone else can browse them.
+
+The last one mattered more than I expected. It gave good lists somewhere to be found
+instead of relying on them being passed around privately.
+
+## What happened, including the part I can't explain
+
+Views went up. People who opened a watchlist usually didn't watch one film from it — they
+watched several. That was the effect I was aiming for and it worked.
+
+The part I didn't predict: **new users started arriving.** The follow mechanics turned into
+a reason to bring people in. Users invited friends to join so they'd have someone to share
+lists with and someone to follow. I built a retention feature and it started acquiring
+users.
+
+I don't know exactly why it worked as well as it did. We never established the cause
+properly.
+
+## About the 12%
+
+The watchlist shipped in a release that also included EPG improvements and HLS streaming
+optimisations. Retention across that release rose 12%.
 
 **I can't tell you how much of that was the watchlist.** The three changes weren't
-instrumented independently, so the honest answer is that they moved together and I don't
-know the split.
+instrumented separately, so all I can honestly say is that they shipped together and the
+number moved.
 
-<!-- KEEP THIS SECTION. Volunteering the limits of your own data is the strongest
-     signal in the whole portfolio. Most candidates over-claim; almost none do this. -->
+I'd rather say that than claim the whole 12%.
 
 ## What I'd do differently
 
-<!-- WRITE THIS. Suggested direction: instrument each change independently before shipping,
-     so the contribution could be isolated. Anything else you'd change about the rollout,
-     the scope, or how you framed it to the team? -->
+Instrument it before shipping, not after.
 
-## Artifacts
+If I built this again I'd put proper event tracking in from the start — PostHog, AppsFlyer,
+Amplitude — and map the actual user journey. Then I could answer the questions I still
+can't: how many people made a list, how many followed someone, how many new users came from
+an invite, and what share of the 12% was mine.
 
-<!--
-  Add real evidence. Screenshots of the watchlist flow, the share sheet, a comment thread.
-  Redact client branding if needed — a redacted real screenshot still beats a mockup.
--->
+The feature worked. I just can't prove which part of it did.
