@@ -6,6 +6,8 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type MutableRefObject,
+  type PointerEvent as ReactPointerEvent,
 } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
@@ -24,7 +26,11 @@ import {
 
 const MUTED = "#6B6560";
 const ACCENT = "#C2410C";
-const ROTATION_SPEED = 0.06;
+const ROTATION_SPEED = 0.045;
+/** Radians of yaw per pixel of horizontal drag. */
+const DRAG_SENSITIVITY = 0.005;
+const INITIAL_YAW = Math.PI - 0.35;
+const INITIAL_PITCH = 0.12;
 
 const scratch = new Object3D();
 
@@ -64,11 +70,11 @@ function LandDots() {
   return (
     <instancedMesh
       ref={meshRef}
-      args={[undefined, undefined, 20000]}
+      args={[undefined, undefined, 14000]}
       frustumCulled={false}
       visible={count > 0}
     >
-      <sphereGeometry args={[0.0075, 5, 5]} />
+      <sphereGeometry args={[0.0065, 5, 5]} />
       <meshBasicMaterial color={MUTED} toneMapped={false} />
     </instancedMesh>
   );
@@ -115,24 +121,37 @@ function PinMarker({
   );
 }
 
+type SpinState = {
+  /** Auto-spin paused while pointer is over the globe. */
+  hovered: boolean;
+  dragging: boolean;
+  yaw: number;
+};
+
 function GlobeGroup({
-  paused,
+  spinRef,
   onPinHover,
   activeId,
 }: {
-  paused: boolean;
+  spinRef: MutableRefObject<SpinState>;
   onPinHover: (pin: GlobePin | null, clientX: number, clientY: number) => void;
   activeId: string | null;
 }) {
   const groupRef = useRef<Group>(null);
 
   useFrame((_, delta) => {
-    if (!groupRef.current || paused) return;
-    groupRef.current.rotation.y += delta * ROTATION_SPEED;
+    const group = groupRef.current;
+    if (!group) return;
+    const spin = spinRef.current;
+    if (!spin.hovered && !spin.dragging) {
+      spin.yaw += delta * ROTATION_SPEED;
+    }
+    group.rotation.x = INITIAL_PITCH;
+    group.rotation.y = spin.yaw;
   });
 
   return (
-    <group ref={groupRef} rotation={[0.2, -0.6, 0]}>
+    <group ref={groupRef} rotation={[INITIAL_PITCH, INITIAL_YAW, 0]}>
       <LandDots />
       {globePins.map((pin) => (
         <PinMarker
@@ -156,8 +175,14 @@ function PinCard({
   y: number;
 }) {
   const style: CSSProperties = {
-    left: Math.min(x + 16, typeof window !== "undefined" ? window.innerWidth - 280 : x),
-    top: Math.min(y + 16, typeof window !== "undefined" ? window.innerHeight - 200 : y),
+    left: Math.min(
+      x + 16,
+      typeof window !== "undefined" ? window.innerWidth - 280 : x,
+    ),
+    top: Math.min(
+      y + 16,
+      typeof window !== "undefined" ? window.innerHeight - 200 : y,
+    ),
   };
 
   return (
@@ -203,46 +228,91 @@ function PinCard({
 export default function GlobeCanvas() {
   const [active, setActive] = useState<GlobePin | null>(null);
   const [pointer, setPointer] = useState({ x: 0, y: 0 });
-  const [paused, setPaused] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const lastDragX = useRef(0);
+  const spinRef = useRef<SpinState>({
+    hovered: false,
+    dragging: false,
+    yaw: INITIAL_YAW,
+  });
 
-  const onPinHover = (pin: GlobePin | null, clientX: number, clientY: number) => {
+  const onPinHover = (
+    pin: GlobePin | null,
+    clientX: number,
+    clientY: number,
+  ) => {
+    if (spinRef.current.dragging) return;
     const bounds = wrapRef.current?.getBoundingClientRect();
     setActive(pin);
-    setPaused(Boolean(pin));
     if (bounds) {
       setPointer({ x: clientX - bounds.left, y: clientY - bounds.top });
     }
   };
 
+  const endDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!spinRef.current.dragging) return;
+    spinRef.current.dragging = false;
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {
+      /* already released */
+    }
+  };
+
   return (
-    <div
-      ref={wrapRef}
-      className="relative h-[min(28rem,70vw)] w-full"
-      onPointerEnter={() => setPaused(true)}
-      onPointerLeave={() => {
-        setPaused(false);
-        setActive(null);
-      }}
-    >
-      <Canvas
-        camera={{ position: [0, 0.15, 2.75], fov: 42, near: 0.1, far: 20 }}
-        dpr={[1, 1.5]}
-        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-        style={{ background: "transparent" }}
-        onPointerMissed={() => setActive(null)}
+    <div className="mx-auto w-full max-w-[min(28rem,70vw)]">
+      <div
+        ref={wrapRef}
+        className="relative aspect-square w-full cursor-grab touch-none active:cursor-grabbing"
+        onPointerEnter={() => {
+          spinRef.current.hovered = true;
+        }}
+        onPointerLeave={(event) => {
+          spinRef.current.hovered = false;
+          endDrag(event);
+          setActive(null);
+        }}
+        onPointerDown={(event) => {
+          if (event.button !== 0) return;
+          spinRef.current.dragging = true;
+          spinRef.current.hovered = true;
+          lastDragX.current = event.clientX;
+          setActive(null);
+          event.currentTarget.setPointerCapture(event.pointerId);
+        }}
+        onPointerMove={(event) => {
+          if (!spinRef.current.dragging) return;
+          const dx = event.clientX - lastDragX.current;
+          lastDragX.current = event.clientX;
+          // Drag right → globe turns left (natural “grab the surface” feel).
+          spinRef.current.yaw += dx * DRAG_SENSITIVITY;
+        }}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
       >
-        <GlobeGroup
-          paused={paused}
-          onPinHover={onPinHover}
-          activeId={active?.id ?? null}
-        />
-      </Canvas>
+        <Canvas
+          camera={{ position: [0, 0, 5], fov: 30, near: 0.1, far: 40 }}
+          dpr={[1, 1.5]}
+          gl={{
+            antialias: true,
+            alpha: true,
+            powerPreference: "high-performance",
+          }}
+          style={{ background: "transparent" }}
+          onPointerMissed={() => setActive(null)}
+        >
+          <GlobeGroup
+            spinRef={spinRef}
+            onPinHover={onPinHover}
+            activeId={active?.id ?? null}
+          />
+        </Canvas>
 
-      {active ? <PinCard pin={active} x={pointer.x} y={pointer.y} /> : null}
+        {active ? <PinCard pin={active} x={pointer.x} y={pointer.y} /> : null}
+      </div>
 
-      <p className="pointer-events-none absolute bottom-0 left-0 font-mono text-xs text-muted">
-        Six apps · five regions — hover a pin
+      <p className="mt-4 font-mono text-xs text-muted">
+        Six apps · five regions — hover a pin · drag to turn
       </p>
     </div>
   );

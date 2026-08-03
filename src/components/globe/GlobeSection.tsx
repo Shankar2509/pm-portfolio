@@ -18,7 +18,7 @@ export function GlobeSection() {
 
   return (
     <section
-      className="mx-auto w-full max-w-6xl px-6 pb-8 md:px-10 lg:px-12"
+      className="mx-auto w-full max-w-6xl px-6 py-6 md:px-10 md:py-8 lg:px-12"
       aria-label="Markets where the six apps shipped"
     >
       {gate === "3d" ? <GlobeCanvas /> : <GlobeFallback />}

@@ -18,7 +18,10 @@ function appsByName(...names: string[]): ShippedApp[] {
   });
 }
 
-/** Five markets · six apps. US pin carries both muVpix and YOW.tv. */
+/**
+ * Six pins · six apps. US gets two pins with a small geographic gap
+ * so muVpix and YOW.tv read as separate markers.
+ */
 export const globePins: GlobePin[] = [
   {
     id: "europe",
@@ -42,11 +45,18 @@ export const globePins: GlobePin[] = [
     apps: appsByName("Karya Reels"),
   },
   {
-    id: "us",
+    id: "us-muvpix",
     region: "US",
-    lat: 39.8,
-    lng: -98.6,
-    apps: appsByName("muVpix", "YOW.tv"),
+    lat: 44.0,
+    lng: -110.0,
+    apps: appsByName("muVpix"),
+  },
+  {
+    id: "us-yow",
+    region: "US",
+    lat: 33.5,
+    lng: -86.0,
+    apps: appsByName("YOW.tv"),
   },
   {
     id: "mena",
