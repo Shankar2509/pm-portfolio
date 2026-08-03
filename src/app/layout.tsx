@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Instrument_Serif } from "next/font/google";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import { Analytics } from "@vercel/analytics/next";
 import { SmoothScroll } from "@/components/SmoothScroll";
+import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
 const instrumentSerif = Instrument_Serif({
@@ -14,9 +16,25 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Leela Shankar Gurram",
-  description:
-    "An engineer who owns the commercial side of products — six streaming apps across five regions.",
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: "Leela Shankar Gurram — Product & Project Management",
+    template: "%s — Leela Shankar Gurram",
+  },
+  description: siteConfig.description,
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteConfig.url,
+    siteName: "Leela Shankar Gurram",
+    title: "Leela Shankar Gurram — Product & Project Management",
+    description: siteConfig.description,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Leela Shankar Gurram — Product & Project Management",
+    description: siteConfig.description,
+  },
 };
 
 export default function RootLayout({
@@ -31,6 +49,7 @@ export default function RootLayout({
     >
       <body className="bg-paper text-ink font-sans text-base antialiased">
         <SmoothScroll>{children}</SmoothScroll>
+        <Analytics />
       </body>
     </html>
   );

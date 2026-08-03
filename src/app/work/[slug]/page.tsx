@@ -30,6 +30,16 @@ export async function generateMetadata({
   return {
     title: study.meta.title,
     description: study.meta.summary,
+    openGraph: {
+      title: study.meta.title,
+      description: study.meta.summary,
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: study.meta.title,
+      description: study.meta.summary,
+    },
   };
 }
 

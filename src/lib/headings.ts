@@ -3,32 +3,19 @@ export function stripHtmlComments(source: string): string {
 }
 
 /**
- * next-mdx-remote / MDX can mis-parse markdown that immediately follows a
- * self-closing JSX component (e.g. `<Metric />` then `## Heading`), turning
- * the heading into a broken setext fragment ("- -") or dropping it.
+ * next-mdx-remote can mis-parse markdown that immediately follows a self-closing
+ * JSX block (e.g. `<Metric />` then `## Heading`). Insert an inert MDX expression
+ * so the heading stays an h2 and the component still renders with its props.
  *
+ * Do not rewrite Metric props to JSX expressions — client components receive
+ * empty values for those through the RSC MDX path.
  * In-memory only — never rewrite the source files.
- * 1. Re-express Metric props as JSX expressions (avoids attribute edge cases)
- * 2. Insert `{null}` between block JSX and a following ATX heading to force
- *    the markdown parser to resume cleanly.
  */
 export function prepareMdxSource(source: string): string {
-  let out = source.replace(
-    /<Metric\s+([^>]*?)\s*\/>/g,
-    (_full, attrs: string) => {
-      const value = /value="([^"]*)"/.exec(attrs)?.[1] ?? "";
-      const caveat = /caveat="([^"]*)"/.exec(attrs)?.[1] ?? "";
-      return `<Metric value={${JSON.stringify(value)}} caveat={${JSON.stringify(caveat)}} />`;
-    },
-  );
-
-  // Block-level JSX (self-closing PascalCase) followed by an ATX heading
-  out = out.replace(
-    /(<\/?[A-Z][A-Za-z0-9]*\b[^>]*\/?>)\s*\n+(##\s)/g,
+  return source.replace(
+    /(<Metric\b[^>]*\/>)\s*\n+(##\s)/g,
     "$1\n\n{null}\n\n$2",
   );
-
-  return out;
 }
 
 export function slugifyHeading(text: string): string {
