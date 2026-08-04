@@ -56,8 +56,11 @@ body {
   line-height: var(--text-base--line-height);
 }
 
-a {
-  color: var(--color-accent);
+/* In @layer base so utility classes (e.g. text-ink) can override it. */
+@layer base {
+  a {
+    color: var(--color-accent);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -4,6 +4,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import { CaseStudyShell } from "@/components/work/CaseStudyShell";
 import { caseStudyComponents } from "@/components/work/mdx";
 import {
+  getCaseStudies,
   getCaseStudyBySlug,
   getCaseStudySlugs,
   type PublishedSlug,
@@ -51,8 +52,18 @@ export default async function CaseStudyPage({ params }: PageProps) {
     notFound();
   }
 
+  const ordered = getCaseStudies();
+  const index = ordered.findIndex((s) => s.meta.slug === study.meta.slug);
+  const toAdjacent = (s: (typeof ordered)[number] | undefined) =>
+    s ? { slug: s.meta.slug, title: s.meta.title } : null;
+
   return (
-    <CaseStudyShell meta={study.meta} headings={study.headings}>
+    <CaseStudyShell
+      meta={study.meta}
+      headings={study.headings}
+      previous={toAdjacent(ordered[index - 1])}
+      next={toAdjacent(ordered[index + 1])}
+    >
       <MDXRemote source={study.body} components={caseStudyComponents} />
     </CaseStudyShell>
   );

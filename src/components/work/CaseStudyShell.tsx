@@ -5,15 +5,24 @@ import { CaseStudyNav } from "./CaseStudyNav";
 import { ScrollProgress } from "./ScrollProgress";
 import { SectionProvider } from "./SectionContext";
 
+type AdjacentStudy = {
+  slug: string;
+  title: string;
+} | null;
+
 type CaseStudyShellProps = {
   meta: CaseStudyMeta;
   headings: CaseStudyHeading[];
+  previous?: AdjacentStudy;
+  next?: AdjacentStudy;
   children: React.ReactNode;
 };
 
 export function CaseStudyShell({
   meta,
   headings,
+  previous = null,
+  next = null,
   children,
 }: CaseStudyShellProps) {
   return (
@@ -46,6 +55,42 @@ export function CaseStudyShell({
 
           <article className="max-w-[65ch] text-left text-base text-ink">
             <SectionProvider>{children}</SectionProvider>
+
+            {previous || next ? (
+              <nav
+                aria-label="More case studies"
+                className="mt-16 flex flex-wrap justify-between gap-6 border-t border-rule pt-8"
+              >
+                {previous ? (
+                  <Link
+                    href={`/work/${previous.slug}`}
+                    className="max-w-[45%] no-underline"
+                  >
+                    <span className="block font-mono text-xs text-muted">
+                      ← Previous
+                    </span>
+                    <span className="mt-1 block font-display text-lg text-ink hover:text-accent">
+                      {previous.title}
+                    </span>
+                  </Link>
+                ) : (
+                  <span aria-hidden />
+                )}
+                {next ? (
+                  <Link
+                    href={`/work/${next.slug}`}
+                    className="max-w-[45%] text-right no-underline"
+                  >
+                    <span className="block font-mono text-xs text-muted">
+                      Next →
+                    </span>
+                    <span className="mt-1 block font-display text-lg text-ink hover:text-accent">
+                      {next.title}
+                    </span>
+                  </Link>
+                ) : null}
+              </nav>
+            ) : null}
           </article>
         </div>
       </div>

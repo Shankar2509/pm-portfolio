@@ -9,8 +9,9 @@ type NetworkInformation = {
 };
 
 /**
- * 3D loads only after client measurement confirms all of:
- * no prefers-reduced-motion, viewport ≥ 768px, save-data off.
+ * 3D loads only after client measurement confirms:
+ * no prefers-reduced-motion and save-data off. Mobile gets the 3D globe too
+ * (dpr-capped, touch drag) — only motion/data preferences gate it.
  * Defaults to pending → fallback UI, never flashes the WebGL bundle.
  */
 export function useGlobeGate(): GlobeGate {
@@ -18,7 +19,6 @@ export function useGlobeGate(): GlobeGate {
 
   useEffect(() => {
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const narrow = window.matchMedia("(max-width: 767px)");
 
     const decide = () => {
       const connection = (navigator as Navigator & {
@@ -26,7 +26,7 @@ export function useGlobeGate(): GlobeGate {
       }).connection;
       const saveData = connection?.saveData === true;
 
-      if (motion.matches || narrow.matches || saveData) {
+      if (motion.matches || saveData) {
         setGate("fallback");
         return;
       }
@@ -35,10 +35,8 @@ export function useGlobeGate(): GlobeGate {
 
     decide();
     motion.addEventListener("change", decide);
-    narrow.addEventListener("change", decide);
     return () => {
       motion.removeEventListener("change", decide);
-      narrow.removeEventListener("change", decide);
     };
   }, []);
 

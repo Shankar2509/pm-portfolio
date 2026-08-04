@@ -11,9 +11,15 @@ import {
 } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
+  BackSide,
+  BufferGeometry,
+  CubicBezierCurve3,
   InstancedMesh,
+  Line as ThreeLine,
+  LineDashedMaterial,
   MathUtils,
   Object3D,
+  Vector3,
   type Group,
   type Mesh,
 } from "three";
@@ -24,13 +30,27 @@ import {
   loadLandPositions,
 } from "@/components/globe/sampleLandMask";
 
+const PAPER = "#FAF9F6";
 const MUTED = "#6B6560";
+const RULE = "#E3DFD8";
+const INK = "#14110F";
 const ACCENT = "#C2410C";
 const ROTATION_SPEED = 0.045;
 /** Radians of yaw per pixel of horizontal drag. */
 const DRAG_SENSITIVITY = 0.005;
-const INITIAL_YAW = Math.PI - 0.35;
+/** Start facing India — the arcs' origin — instead of the Atlantic. */
+const INITIAL_YAW = Math.PI - 1.55;
 const INITIAL_PITCH = 0.12;
+
+/** Bengaluru — where the apps are built. Arc origin and home marker. */
+const HOME = { lat: 12.97, lng: 77.59 };
+
+const ARC_POINTS = 72;
+const PIN_INTRO_DELAY = 0.35;
+const PIN_INTRO_STAGGER = 0.12;
+const ARC_INTRO_DELAY = 0.8;
+const ARC_INTRO_STAGGER = 0.16;
+const ARC_DRAW_SECONDS = 0.9;
 
 const scratch = new Object3D();
 
@@ -80,12 +100,161 @@ function LandDots() {
   );
 }
 
+/**
+ * Solid paper body so far-side dots are occluded and the globe reads as an
+ * object, plus a hairline-toned rim behind it for depth. Palette only.
+ */
+function GlobeBody() {
+  return (
+    <>
+      <mesh>
+        <sphereGeometry args={[GLOBE_RADIUS_UNITS * 0.992, 48, 48]} />
+        <meshBasicMaterial color={PAPER} toneMapped={false} />
+      </mesh>
+      <mesh>
+        <sphereGeometry args={[GLOBE_RADIUS_UNITS * 1.045, 48, 48]} />
+        <meshBasicMaterial
+          color={RULE}
+          side={BackSide}
+          transparent
+          opacity={0.7}
+          toneMapped={false}
+        />
+      </mesh>
+    </>
+  );
+}
+
+function HomeMarker() {
+  const position = useMemo(
+    () => latLngToVector3(HOME.lat, HOME.lng, GLOBE_RADIUS_UNITS * 1.015),
+    [],
+  );
+
+  return (
+    <mesh position={position}>
+      <sphereGeometry args={[0.02, 10, 10]} />
+      <meshBasicMaterial color={INK} toneMapped={false} />
+    </mesh>
+  );
+}
+
+type Arc = {
+  line: ThreeLine;
+  material: LineDashedMaterial;
+  geometry: BufferGeometry;
+  /** Pristine copy of lineDistance values; offsetting them animates the dash flow. */
+  baseDistances: Float32Array;
+  delay: number;
+};
+
+/**
+ * One arc per market, Bengaluru → pin. Each draws in (drawRange) on a
+ * stagger, then a slow dash-offset drift keeps the routes visibly "live".
+ */
+function Arcs() {
+  const arcs = useMemo<Arc[]>(() => {
+    const start = new Vector3(
+      ...latLngToVector3(HOME.lat, HOME.lng, GLOBE_RADIUS_UNITS * 1.005),
+    );
+
+    return globePins.map((pin, index) => {
+      const end = new Vector3(
+        ...latLngToVector3(pin.lat, pin.lng, GLOBE_RADIUS_UNITS * 1.01),
+      );
+      const angle = start.angleTo(end);
+      const lift = 1 + 0.16 + 0.3 * (angle / Math.PI);
+      const c1 = start
+        .clone()
+        .multiplyScalar(2)
+        .add(end)
+        .normalize()
+        .multiplyScalar(GLOBE_RADIUS_UNITS * lift);
+      const c2 = start
+        .clone()
+        .add(end.clone().multiplyScalar(2))
+        .normalize()
+        .multiplyScalar(GLOBE_RADIUS_UNITS * lift);
+
+      const curve = new CubicBezierCurve3(start, c1, c2, end);
+      const geometry = new BufferGeometry().setFromPoints(
+        curve.getPoints(ARC_POINTS),
+      );
+      const material = new LineDashedMaterial({
+        color: ACCENT,
+        dashSize: 0.045,
+        gapSize: 0.028,
+        transparent: true,
+        opacity: 0.55,
+        toneMapped: false,
+      });
+      const line = new ThreeLine(geometry, material);
+      line.computeLineDistances();
+      geometry.setDrawRange(0, 0);
+
+      const distances = geometry.getAttribute("lineDistance");
+      const baseDistances = new Float32Array(
+        distances.array as Float32Array,
+      );
+
+      return {
+        line,
+        material,
+        geometry,
+        baseDistances,
+        delay: ARC_INTRO_DELAY + index * ARC_INTRO_STAGGER,
+      };
+    });
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      arcs.forEach((arc) => {
+        arc.geometry.dispose();
+        arc.material.dispose();
+      });
+    };
+  }, [arcs]);
+
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
+    arcs.forEach((arc) => {
+      const appear = MathUtils.clamp(
+        (t - arc.delay) / ARC_DRAW_SECONDS,
+        0,
+        1,
+      );
+      arc.geometry.setDrawRange(0, Math.floor(appear * (ARC_POINTS + 1)));
+      if (appear === 1) {
+        // Shift lineDistance values to make the dash pattern drift along the arc.
+        const attribute = arc.geometry.getAttribute("lineDistance");
+        const values = attribute.array as Float32Array;
+        const offset = (t * 0.045) % 1;
+        for (let i = 0; i < values.length; i++) {
+          values[i] = arc.baseDistances[i]! + offset;
+        }
+        attribute.needsUpdate = true;
+      }
+    });
+  });
+
+  return (
+    <>
+      {arcs.map((arc, index) => (
+        <primitive key={index} object={arc.line} />
+      ))}
+    </>
+  );
+}
+
 function PinMarker({
   pin,
+  index,
   active,
   onHover,
 }: {
   pin: GlobePin;
+  index: number;
   active: boolean;
   onHover: (pin: GlobePin | null, clientX: number, clientY: number) => void;
 }) {
@@ -95,17 +264,26 @@ function PinMarker({
     [pin.lat, pin.lng],
   );
 
-  useFrame(() => {
+  useFrame(({ clock }) => {
     if (!ref.current) return;
-    const target = active ? 1.35 : 1;
-    const s = MathUtils.lerp(ref.current.scale.x, target, 0.15);
-    ref.current.scale.setScalar(s);
+    const delay = PIN_INTRO_DELAY + index * PIN_INTRO_STAGGER;
+    const appear = MathUtils.clamp(
+      (clock.getElapsedTime() - delay) / 0.45,
+      0,
+      1,
+    );
+    // easeOutBack-ish overshoot so pins "land" rather than fade.
+    const eased = 1 + 1.6 * Math.pow(appear - 1, 3) + 0.6 * Math.pow(appear - 1, 2);
+    const target = (appear >= 1 ? 1 : Math.max(0, eased)) * (active ? 1.35 : 1);
+    const s = MathUtils.lerp(ref.current.scale.x, target, 0.2);
+    ref.current.scale.setScalar(Math.max(0.0001, s));
   });
 
   return (
     <mesh
       ref={ref}
       position={position}
+      scale={0.0001}
       onPointerOver={(event) => {
         event.stopPropagation();
         onHover(pin, event.clientX, event.clientY);
@@ -152,11 +330,15 @@ function GlobeGroup({
 
   return (
     <group ref={groupRef} rotation={[INITIAL_PITCH, INITIAL_YAW, 0]}>
+      <GlobeBody />
       <LandDots />
-      {globePins.map((pin) => (
+      <HomeMarker />
+      <Arcs />
+      {globePins.map((pin, index) => (
         <PinMarker
           key={pin.id}
           pin={pin}
+          index={index}
           active={activeId === pin.id}
           onHover={onPinHover}
         />
@@ -260,10 +442,10 @@ export default function GlobeCanvas() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[min(28rem,70vw)]">
+    <div className="mx-auto w-full max-w-[min(36rem,92vw)]">
       <div
         ref={wrapRef}
-        className="relative aspect-square w-full cursor-grab touch-none active:cursor-grabbing"
+        className="relative aspect-square w-full cursor-grab [touch-action:pan-y] active:cursor-grabbing"
         onPointerEnter={() => {
           spinRef.current.hovered = true;
         }}
@@ -273,7 +455,7 @@ export default function GlobeCanvas() {
           setActive(null);
         }}
         onPointerDown={(event) => {
-          if (event.button !== 0) return;
+          if (event.button !== 0 && event.pointerType === "mouse") return;
           spinRef.current.dragging = true;
           spinRef.current.hovered = true;
           lastDragX.current = event.clientX;
@@ -312,7 +494,8 @@ export default function GlobeCanvas() {
       </div>
 
       <p className="mt-4 font-mono text-xs text-muted">
-        Six apps · five regions — hover a pin · drag to turn
+        Built from Bengaluru · earning in five regions — hover a pin · drag to
+        turn
       </p>
     </div>
   );
