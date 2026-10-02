@@ -48,10 +48,11 @@ export default function AboutPage() {
           About
         </p>
 
-        <div className="mt-6 grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,1fr)_auto]">
+        <div className="mt-6 grid grid-cols-1 gap-12 md:grid-cols-[minmax(0,1fr)_18rem] lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-16">
           <div className="max-w-[65ch]">
             <h1 className="font-display text-3xl text-ink md:text-4xl">
-              An engineer who ended up owning the money layer.
+              An engineer who ended up owning the{" "}
+              <em className="text-accent">money layer</em>.
             </h1>
 
             <p className="mt-8 text-base text-ink">
@@ -102,26 +103,6 @@ export default function AboutPage() {
               mine to argue.
             </p>
 
-            <h2 className="mt-12 font-display text-2xl text-ink">
-              The record
-            </h2>
-
-            <ul className="m-0 mt-6 list-none p-0">
-              {record.map((item) => (
-                <li
-                  key={item.label}
-                  className="grid grid-cols-1 gap-1 border-b border-rule py-4 first:border-t sm:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] sm:gap-6"
-                >
-                  <span className="font-sans text-sm text-ink">
-                    {item.label}
-                  </span>
-                  <span className="font-mono text-xs text-muted">
-                    {item.detail}
-                  </span>
-                </li>
-              ))}
-            </ul>
-
             <p className="mt-10 font-sans text-sm">
               <a href="mailto:leelashankargurram@gmail.com">
                 leelashankargurram@gmail.com
@@ -147,22 +128,45 @@ export default function AboutPage() {
             </p>
           </div>
 
-          {portraitSrc ? (
-            <figure className="m-0 hidden w-[16rem] md:block lg:w-[18rem]">
-              <div className="relative aspect-[4/5] w-full overflow-hidden border border-rule">
-                <Image
-                  src={portraitSrc}
-                  alt="Portrait of Leela Shankar Gurram"
-                  fill
-                  sizes="18rem"
-                  className="object-cover"
-                />
-              </div>
-              <figcaption className="mt-3 font-mono text-xs text-muted">
-                Bengaluru, India
-              </figcaption>
-            </figure>
-          ) : null}
+          <aside className="self-start md:sticky md:top-24">
+            {portraitSrc ? (
+              <figure className="m-0 mb-8 hidden w-full md:block">
+                <div className="border border-rule-gold bg-surface p-2">
+                  <div className="relative aspect-[4/5] w-full overflow-hidden border border-rule">
+                    <Image
+                      src={portraitSrc}
+                      alt="Portrait of Leela Shankar Gurram"
+                      fill
+                      sizes="20rem"
+                      className="object-cover"
+                    />
+                  </div>
+                </div>
+                <figcaption className="mt-3 font-mono text-xs text-muted">
+                  Bengaluru, India
+                </figcaption>
+              </figure>
+            ) : null}
+
+            <p className="border-t border-rule-gold pt-4 font-mono text-xs tracking-wide text-accent uppercase">
+              The record
+            </p>
+            <ul className="m-0 mt-2 list-none p-0">
+              {record.map((item) => (
+                <li
+                  key={item.label}
+                  className="border-b border-rule py-3 last:border-b-0"
+                >
+                  <span className="block font-sans text-sm text-ink">
+                    {item.label}
+                  </span>
+                  <span className="mt-1 block font-mono text-xs text-muted">
+                    {item.detail}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </aside>
         </div>
       </main>
       <SiteFooter />

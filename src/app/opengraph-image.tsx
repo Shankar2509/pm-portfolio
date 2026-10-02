@@ -29,9 +29,10 @@ export default async function OpenGraphImage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          backgroundColor: "#FAF9F6",
-          color: "#14110F",
+          backgroundColor: "#121216",
+          color: "#F5F2EA",
           padding: "72px 80px",
+          borderBottom: "6px solid #DABA5F",
         }}
       >
         <div
@@ -50,7 +51,7 @@ export default async function OpenGraphImage() {
             marginTop: 36,
             fontFamily: "Instrument Serif",
             fontSize: 28,
-            color: "#6B6560",
+            color: "#DABA5F",
           }}
         >
           Leela Shankar Gurram

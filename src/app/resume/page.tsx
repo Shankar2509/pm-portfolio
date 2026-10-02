@@ -28,20 +28,22 @@ export default function ResumePage() {
           any bullet point.
         </p>
 
-        <object
-          data="/resume.pdf"
-          type="application/pdf"
-          aria-label="Resume PDF of Leela Shankar Gurram"
-          className="mt-10 h-[75vh] w-full max-w-4xl border border-rule"
-        >
-          <p className="p-6 font-sans text-sm text-muted">
-            Your browser can&apos;t display the PDF inline —{" "}
-            <a href="/resume.pdf" download>
-              download it instead
-            </a>
-            .
-          </p>
-        </object>
+        <div className="mt-10 w-full max-w-4xl border border-rule-gold bg-surface p-2">
+          <object
+            data="/resume.pdf"
+            type="application/pdf"
+            aria-label="Resume PDF of Leela Shankar Gurram"
+            className="h-[75vh] w-full border border-rule"
+          >
+            <p className="p-6 font-sans text-sm text-muted">
+              Your browser can&apos;t display the PDF inline —{" "}
+              <a href="/resume.pdf" download>
+                download it instead
+              </a>
+              .
+            </p>
+          </object>
+        </div>
       </main>
       <SiteFooter />
     </>

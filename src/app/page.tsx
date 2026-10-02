@@ -1,6 +1,5 @@
-import { GlobeSection } from "@/components/globe/GlobeSection";
-import { AppsLedger } from "@/components/home/AppsLedger";
 import { CaseStudyIndex } from "@/components/home/CaseStudyIndex";
+import { MarketsSection } from "@/components/home/MarketsSection";
 import { Hero } from "@/components/home/Hero";
 import { ProofStrip } from "@/components/home/ProofStrip";
 import { SiteFooter } from "@/components/home/SiteFooter";
@@ -22,8 +21,7 @@ export default function Home() {
       <SiteNav />
       <Hero portraitSrc={portraitSrc} />
       <ProofStrip />
-      <GlobeSection />
-      <AppsLedger />
+      <MarketsSection />
       <CaseStudyIndex
         watchlists={watchlists.meta}
         patent={patent.meta}

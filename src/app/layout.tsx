@@ -37,6 +37,36 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Person schema so search engines connect this site to the name.
+ * Facts mirror profile/ and content/metrics.md — nothing invented.
+ */
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Leela Shankar Gurram",
+  jobTitle: "iOS Developer",
+  worksFor: {
+    "@type": "Organization",
+    name: "Contus Tech",
+  },
+  alumniOf: {
+    "@type": "CollegeOrUniversity",
+    name: "Alliance University",
+  },
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Bengaluru",
+    addressCountry: "IN",
+  },
+  email: "mailto:leelashankargurram@gmail.com",
+  url: siteConfig.url,
+  sameAs: [
+    "https://linkedin.com/in/leela-shankar-gurram",
+    "https://leelashankar.vercel.app/",
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -48,6 +78,10 @@ export default function RootLayout({
       className={`${instrumentSerif.variable} ${GeistSans.variable} ${GeistMono.variable}`}
     >
       <body className="bg-paper text-ink font-sans text-base antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+        />
         <SmoothScroll>{children}</SmoothScroll>
         <Analytics />
       </body>

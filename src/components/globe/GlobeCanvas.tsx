@@ -30,11 +30,12 @@ import {
   loadLandPositions,
 } from "@/components/globe/sampleLandMask";
 
-const PAPER = "#FAF9F6";
-const MUTED = "#6B6560";
-const RULE = "#E3DFD8";
-const INK = "#14110F";
-const ACCENT = "#C2410C";
+/* Dark + gold palette — mirrors the tokens in globals.css. */
+const BODY = "#1e1e26"; /* charcoal sphere, slightly above page bg */
+const LAND = "#8d8776"; /* warm-gray land dots */
+const RIM = "#daba5f"; /* gold atmosphere rim */
+const HOME_GOLD = "#e8c768"; /* bright gold home marker */
+const ACCENT = "#daba5f";
 const ROTATION_SPEED = 0.045;
 /** Radians of yaw per pixel of horizontal drag. */
 const DRAG_SENSITIVITY = 0.005;
@@ -95,29 +96,29 @@ function LandDots() {
       visible={count > 0}
     >
       <sphereGeometry args={[0.0065, 5, 5]} />
-      <meshBasicMaterial color={MUTED} toneMapped={false} />
+      <meshBasicMaterial color={LAND} toneMapped={false} />
     </instancedMesh>
   );
 }
 
 /**
- * Solid paper body so far-side dots are occluded and the globe reads as an
- * object, plus a hairline-toned rim behind it for depth. Palette only.
+ * Solid charcoal body so far-side dots are occluded and the globe reads as
+ * an object, plus a faint gold atmosphere rim behind it for depth.
  */
 function GlobeBody() {
   return (
     <>
       <mesh>
         <sphereGeometry args={[GLOBE_RADIUS_UNITS * 0.992, 48, 48]} />
-        <meshBasicMaterial color={PAPER} toneMapped={false} />
+        <meshBasicMaterial color={BODY} toneMapped={false} />
       </mesh>
       <mesh>
         <sphereGeometry args={[GLOBE_RADIUS_UNITS * 1.045, 48, 48]} />
         <meshBasicMaterial
-          color={RULE}
+          color={RIM}
           side={BackSide}
           transparent
-          opacity={0.7}
+          opacity={0.16}
           toneMapped={false}
         />
       </mesh>
@@ -134,7 +135,7 @@ function HomeMarker() {
   return (
     <mesh position={position}>
       <sphereGeometry args={[0.02, 10, 10]} />
-      <meshBasicMaterial color={INK} toneMapped={false} />
+      <meshBasicMaterial color={HOME_GOLD} toneMapped={false} />
     </mesh>
   );
 }
@@ -359,7 +360,7 @@ function PinCard({
   const style: CSSProperties = {
     left: Math.min(
       x + 16,
-      typeof window !== "undefined" ? window.innerWidth - 280 : x,
+      typeof window !== "undefined" ? window.innerWidth - 300 : x,
     ),
     top: Math.min(
       y + 16,
@@ -369,45 +370,75 @@ function PinCard({
 
   return (
     <div
-      className="pointer-events-auto absolute z-10 w-[16rem] border border-rule bg-paper p-3 shadow-none"
+      className="pointer-events-auto absolute z-10 w-[17.5rem] border border-rule-gold bg-surface-2 shadow-none"
       style={style}
       role="dialog"
       aria-label={`${pin.region} apps`}
     >
-      <p className="font-mono text-xs tracking-wide text-muted uppercase">
+      <p className="m-0 border-b border-rule px-3 py-2 font-mono text-xs tracking-wide text-muted uppercase">
         {pin.region}
       </p>
-      <ul className="mt-2 m-0 list-none p-0">
+      <ul className="m-0 list-none p-0">
         {pin.apps.map((app) => (
           <li key={app.href} className="border-t border-rule first:border-t-0">
             <a
               href={app.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="block py-2 no-underline"
+              className="group flex items-center gap-3 px-3 py-3 no-underline"
             >
-              <span className="block font-mono text-sm text-ink hover:text-accent">
-                {app.name}
+              {/* Plain img: this chunk is lazy-loaded and the icon is 10KB. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={app.icon}
+                alt=""
+                width={44}
+                height={44}
+                className="h-11 w-11 shrink-0 rounded-[22%] border border-rule object-cover"
+              />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-mono text-sm text-ink group-hover:text-accent">
+                  {app.name}
+                </span>
+                <span className="mt-0.5 block truncate font-mono text-xs text-muted">
+                  {app.category}
+                </span>
+                <span className="block font-mono text-xs text-muted">
+                  {app.monetization} · {app.platform}
+                </span>
               </span>
-              <span className="mt-0.5 block font-mono text-xs text-muted">
-                {app.monetization}
-              </span>
-              <span className="block font-mono text-xs text-muted">
-                {app.platform}
+              <span
+                aria-hidden
+                className="font-mono text-xs text-muted group-hover:text-accent"
+              >
+                ↗
               </span>
             </a>
           </li>
         ))}
       </ul>
+      <p className="m-0 border-t border-rule px-3 py-1.5 font-mono text-[0.65rem] text-muted">
+        Opens the App Store listing
+      </p>
     </div>
   );
 }
+
+type GlobeCanvasProps = {
+  /** Externally-controlled highlight (e.g. hovering a ledger row). */
+  activeId?: string | null;
+  /** Fired when a pin is hovered/unhovered inside the canvas. */
+  onActiveIdChange?: (id: string | null) => void;
+};
 
 /**
  * Client-only R3F scene. Dynamically imported — keep drei out of this module
  * so the chunk stays under the 250KB gzip budget.
  */
-export default function GlobeCanvas() {
+export default function GlobeCanvas({
+  activeId = null,
+  onActiveIdChange,
+}: GlobeCanvasProps) {
   const [active, setActive] = useState<GlobePin | null>(null);
   const [pointer, setPointer] = useState({ x: 0, y: 0 });
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -426,6 +457,7 @@ export default function GlobeCanvas() {
     if (spinRef.current.dragging) return;
     const bounds = wrapRef.current?.getBoundingClientRect();
     setActive(pin);
+    onActiveIdChange?.(pin?.id ?? null);
     if (bounds) {
       setPointer({ x: clientX - bounds.left, y: clientY - bounds.top });
     }
@@ -442,7 +474,7 @@ export default function GlobeCanvas() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[min(36rem,92vw)]">
+    <div className="mx-auto w-full max-w-[min(30rem,92vw)]">
       <div
         ref={wrapRef}
         className="relative aspect-square w-full cursor-grab [touch-action:pan-y] active:cursor-grabbing"
@@ -453,6 +485,7 @@ export default function GlobeCanvas() {
           spinRef.current.hovered = false;
           endDrag(event);
           setActive(null);
+          onActiveIdChange?.(null);
         }}
         onPointerDown={(event) => {
           if (event.button !== 0 && event.pointerType === "mouse") return;
@@ -486,7 +519,7 @@ export default function GlobeCanvas() {
           <GlobeGroup
             spinRef={spinRef}
             onPinHover={onPinHover}
-            activeId={active?.id ?? null}
+            activeId={active?.id ?? activeId}
           />
         </Canvas>
 

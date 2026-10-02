@@ -26,16 +26,29 @@ Specificity is what makes a portfolio look human-made. Animation is not.
 
 ## Design tokens — never deviate
 
+The site is a **premium dark + gold system** (palette derived from thatsthespirit.nu,
+warmed for reading). Token names are inherited from the old light system — `paper`
+still means "the page".
+
 ```
---paper    #FAF9F6    warm off-white, page background
---ink      #14110F    near-black (never pure #000)
---muted    #6B6560    secondary text
---rule     #E3DFD8    hairlines and borders
---accent   #C2410C    burnt orange
+--paper          #121216    page background (charcoal, never pure #000)
+--surface        #1A1A21    cards, bands
+--surface-2      #232330    raised panels
+--ink            #F5F2EA    warm off-white text
+--muted          #A7A29A    secondary text (6.8:1 on paper)
+--rule           #2E2E38    hairlines and borders
+--rule-gold      #453A20    gold-tinted emphasis hairline
+--accent         #DABA5F    champagne gold (9:1 on paper)
+--accent-bright  #E8C768    hover state
+--accent-deep    #CFA835    pressed / deep fills
 ```
 
-**The accent has exactly one job: links.** Never a button background, never a section
-background, never a gradient stop.
+**The gold accent's jobs: links, hovers, pins/arcs on the globe, metric numerals,
+italic emphasis words in serif displays.** Never a large filled background, never a
+gradient stop except the single `.glow-gold` ambient radial in the hero.
+
+**Depth utilities:** a site-wide film-grain overlay (`body::after`) and one
+`.glow-gold` radial per page. Do not add more glows, shadows, or gradients.
 
 **Type:**
 - Display / headings — **Instrument Serif**

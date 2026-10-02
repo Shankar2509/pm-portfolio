@@ -14,21 +14,24 @@ function IdentityBlock({ animated }: { animated: boolean }) {
   const items = [
     <p
       key="kicker"
-      className="font-mono text-xs tracking-wide text-muted uppercase"
+      className="font-mono text-xs tracking-[0.18em] text-muted uppercase"
     >
       iOS Developer at Contus Tech · Bengaluru, India
     </p>,
     <h1
       key="name"
-      className="mt-4 font-display text-5xl text-ink md:text-6xl lg:text-7xl md:leading-[1.05]"
+      className="mt-6 font-display text-6xl text-ink md:text-7xl lg:text-8xl"
     >
-      Leela Shankar Gurram
+      Leela Shankar
+      <br />
+      Gurram
     </h1>,
     <p
       key="claim"
-      className="mt-6 max-w-[24ch] font-display text-xl text-ink italic md:text-2xl"
+      className="mt-8 max-w-[26ch] font-display text-2xl text-ink md:text-3xl"
     >
-      I own the part of the product that has to make money.
+      I own the part of the product that has to{" "}
+      <em className="text-accent">make money</em>.
     </p>,
     <p
       key="support"
@@ -38,7 +41,7 @@ function IdentityBlock({ animated }: { animated: boolean }) {
       subscriptions, ads, rewarded ads and coins. I&apos;m moving from building
       features to deciding which ones get built.
     </p>,
-    <p key="links" className="mt-8 font-sans text-sm">
+    <p key="links" className="mt-10 font-sans text-sm">
       <a href="mailto:leelashankargurram@gmail.com">
         leelashankargurram@gmail.com
       </a>
@@ -89,19 +92,33 @@ function IdentityBlock({ animated }: { animated: boolean }) {
 
 function Portrait({ src, animated }: { src: string; animated: boolean }) {
   const frame = (
-    <figure className="m-0 w-full max-w-[17rem] justify-self-end lg:max-w-[20rem]">
-      <div className="relative aspect-[4/5] w-full overflow-hidden border border-rule">
-        <Image
-          src={src}
-          alt="Portrait of Leela Shankar Gurram"
-          fill
-          sizes="(max-width: 1024px) 17rem, 20rem"
-          priority
-          className="object-cover"
-        />
+    <figure className="m-0 w-full max-w-[16rem] justify-self-start md:max-w-[20rem] md:justify-self-end lg:max-w-[22rem]">
+      {/* Dark frame with a gold hairline — the only ornament the portrait gets. */}
+      <div className="border border-rule-gold bg-surface p-2">
+        <div className="relative aspect-[4/5] w-full overflow-hidden border border-rule">
+          <Image
+            src={src}
+            alt="Portrait of Leela Shankar Gurram"
+            fill
+            sizes="(max-width: 1024px) 20rem, 22rem"
+            priority
+            className="object-cover"
+          />
+        </div>
       </div>
-      <figcaption className="mt-3 font-mono text-xs text-muted">
-        Leela Shankar Gurram — Bengaluru
+      <figcaption className="mt-4 border-t border-rule pt-3">
+        <span className="block font-mono text-xs tracking-wide text-accent uppercase">
+          Currently
+        </span>
+        <span className="mt-1 block font-mono text-xs text-ink">
+          iOS Developer · Contus Tech
+        </span>
+        <span className="block font-mono text-xs text-ink">
+          Bengaluru, India
+        </span>
+        <span className="block font-mono text-xs text-muted">
+          Google Project Management Certificate · in progress
+        </span>
       </figcaption>
     </figure>
   );
@@ -110,7 +127,7 @@ function Portrait({ src, animated }: { src: string; animated: boolean }) {
 
   return (
     <motion.div
-      className="justify-self-end"
+      className="justify-self-start md:justify-self-end"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease, delay: 0.35 }}
@@ -125,16 +142,21 @@ export function Hero({ portraitSrc }: HeroProps) {
   const animated = !prefersReducedMotion;
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-6 pt-16 pb-14 text-left md:px-10 md:pt-24 lg:px-12">
+    <section className="relative mx-auto w-full max-w-6xl overflow-visible px-6 pt-16 pb-16 text-left md:px-10 md:pt-24 md:pb-24 lg:px-12">
+      {/* Single ambient glow behind the name — the page's one gradient. */}
+      <div
+        aria-hidden
+        className="glow-gold -top-32 -left-24 h-[30rem] w-[30rem] md:h-[40rem] md:w-[40rem]"
+      />
       {portraitSrc ? (
-        <div className="grid grid-cols-1 items-start gap-10 md:grid-cols-[minmax(0,1fr)_auto] md:gap-14">
+        <div className="relative grid grid-cols-1 items-start gap-12 md:grid-cols-[minmax(0,1fr)_auto] md:gap-14">
           <IdentityBlock animated={animated} />
-          <div className="hidden md:block">
-            <Portrait src={portraitSrc} animated={animated} />
-          </div>
+          <Portrait src={portraitSrc} animated={animated} />
         </div>
       ) : (
-        <IdentityBlock animated={animated} />
+        <div className="relative">
+          <IdentityBlock animated={animated} />
+        </div>
       )}
     </section>
   );

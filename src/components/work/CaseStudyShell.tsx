@@ -38,7 +38,7 @@ export function CaseStudyShell({
         </Link>
 
         <header className="mt-10 mb-14 max-w-[65ch] text-left">
-          <h1 className="font-display text-4xl text-ink md:text-5xl">
+          <h1 className="font-display text-4xl text-ink md:text-6xl">
             {meta.title}
           </h1>
           <div className="mt-6 space-y-1 font-sans text-sm text-muted">

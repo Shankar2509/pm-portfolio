@@ -1,4 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
+import { shippedApps } from "@/data/apps";
 
 /**
  * Evidence row, ledger-styled: every item is checkable, none is a bare
@@ -8,11 +10,29 @@ export function ProofStrip() {
   return (
     <section
       aria-label="Verifiable record"
-      className="mx-auto w-full max-w-6xl px-6 md:px-10 lg:px-12"
+      className="w-full border-y border-rule-gold bg-surface"
     >
-      <ul className="m-0 flex list-none flex-wrap items-baseline gap-x-8 gap-y-2 border-y border-rule py-4 pl-0">
+      <ul className="mx-auto flex w-full max-w-6xl list-none flex-wrap items-center gap-x-8 gap-y-2 px-6 py-5 md:px-10 lg:px-12">
         <li className="font-mono text-xs text-muted">
-          <a href="#ledger" className="text-ink no-underline hover:text-accent">
+          <a
+            href="#ledger"
+            className="group flex items-center gap-3 text-ink no-underline hover:text-accent"
+          >
+            {/* The actual App Store artwork — evidence, not decoration. */}
+            <span className="flex shrink-0">
+              {shippedApps.map((app, index) => (
+                <Image
+                  key={app.href}
+                  src={app.icon}
+                  alt=""
+                  width={20}
+                  height={20}
+                  className={`h-5 w-5 rounded-[22%] border border-rule object-cover ${
+                    index > 0 ? "-ml-1.5" : ""
+                  }`}
+                />
+              ))}
+            </span>
             6 apps live on the App Store
           </a>
         </li>

@@ -45,7 +45,9 @@ function isStandaloneBold(children: ReactNode): boolean {
   return isValidElement(only) && only.type === "strong";
 }
 
-const breakoutClass = "max-w-[min(40rem,100%)] text-lg text-ink";
+// At xl, breakouts extend past the 65ch prose column into the right margin.
+const breakoutClass =
+  "max-w-[min(40rem,100%)] text-lg text-ink xl:w-[40rem] xl:max-w-none";
 
 export function MdxH2({ children }: ComponentPropsWithoutRef<"h2">) {
   const { setType } = useSectionApi();
@@ -85,7 +87,7 @@ export function MdxParagraph({ children }: ComponentPropsWithoutRef<"p">) {
     <Reveal
       kind={proseRevealKind(type)}
       as="p"
-      className="my-4 text-base text-ink"
+      className="my-5 text-base leading-relaxed text-ink md:text-lg md:leading-relaxed"
     >
       {children}
     </Reveal>
@@ -99,7 +101,7 @@ export function MdxBlockquote({
     <Reveal
       kind="breakout"
       as="blockquote"
-      className={`${breakoutClass} my-10 border-l border-rule pl-6 font-display italic`}
+      className={`${breakoutClass} my-10 border-l-2 border-rule-gold pl-6 font-display italic`}
     >
       {children}
     </Reveal>
@@ -157,7 +159,10 @@ export function MdxUl(props: ComponentPropsWithoutRef<"ul">) {
   const { getType } = useSectionApi();
   return (
     <Reveal kind={proseRevealKind(getType())} className="my-4">
-      <ul className="list-disc space-y-2 pl-5 text-base text-ink" {...props} />
+      <ul
+        className="list-disc space-y-2 pl-5 text-base leading-relaxed text-ink md:text-lg md:leading-relaxed"
+        {...props}
+      />
     </Reveal>
   );
 }
@@ -167,7 +172,7 @@ export function MdxOl(props: ComponentPropsWithoutRef<"ol">) {
   return (
     <Reveal kind={proseRevealKind(getType())} className="my-4">
       <ol
-        className="list-decimal space-y-2 pl-5 text-base text-ink"
+        className="list-decimal space-y-2 pl-5 text-base leading-relaxed text-ink md:text-lg md:leading-relaxed"
         {...props}
       />
     </Reveal>

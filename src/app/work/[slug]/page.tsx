@@ -44,6 +44,19 @@ export async function generateMetadata({
   };
 }
 
+/** The patent is the one work with an official registry entry — mark it up. */
+const patentJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CreativeWork",
+  name: "Vehicle safety system",
+  identifier: "Indian Patent Application No. 202441049990",
+  creativeWorkStatus: "Published",
+  author: {
+    "@type": "Person",
+    name: "Leela Shankar Gurram",
+  },
+};
+
 export default async function CaseStudyPage({ params }: PageProps) {
   const { slug } = await params;
   const study = getCaseStudyBySlug(slug);
@@ -58,13 +71,21 @@ export default async function CaseStudyPage({ params }: PageProps) {
     s ? { slug: s.meta.slug, title: s.meta.title } : null;
 
   return (
-    <CaseStudyShell
-      meta={study.meta}
-      headings={study.headings}
-      previous={toAdjacent(ordered[index - 1])}
-      next={toAdjacent(ordered[index + 1])}
-    >
-      <MDXRemote source={study.body} components={caseStudyComponents} />
-    </CaseStudyShell>
+    <>
+      {slug === "vehicle-safety-patent" ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(patentJsonLd) }}
+        />
+      ) : null}
+      <CaseStudyShell
+        meta={study.meta}
+        headings={study.headings}
+        previous={toAdjacent(ordered[index - 1])}
+        next={toAdjacent(ordered[index + 1])}
+      >
+        <MDXRemote source={study.body} components={caseStudyComponents} />
+      </CaseStudyShell>
+    </>
   );
 }
